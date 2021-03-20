@@ -11,17 +11,16 @@ amqp.connect(process.env.CLOUDAMQP_URL, function (error0, connection) {
     if (error1) {
       throw error1;
     }
-    var queue = 'task_queue';
+    var exchange = 'logs';
     var msg = process.argv.slice(2).join(' ') || 'Hello World!';
 
-    channel.assertQueue(queue, {
-      durable: true,
+    channel.assertExchange(exchange, 'fanout', {
+      durable: false,
     });
-    channel.sendToQueue(queue, Buffer.from(msg), {
-      persistent: true,
-    });
-    console.log(" [x] Sent '%s'", msg);
+    channel.publish(exchange, '', Buffer.from(msg));
+    console.log(' [x] Sent %s', msg);
   });
+
   setTimeout(function () {
     connection.close();
     process.exit(0);
